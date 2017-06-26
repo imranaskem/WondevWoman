@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.26430.6
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WondevWoman", "WondevWoman\WondevWoman.csproj", "{DA6FB595-4399-4A3A-9401-6106C4DDDE8A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WondevWomanTests", "WondevWomanTests\WondevWomanTests.csproj", "{415FF9EF-194E-40D2-B7A9-0AA059826DF5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{DA6FB595-4399-4A3A-9401-6106C4DDDE8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DA6FB595-4399-4A3A-9401-6106C4DDDE8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DA6FB595-4399-4A3A-9401-6106C4DDDE8A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{415FF9EF-194E-40D2-B7A9-0AA059826DF5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{415FF9EF-194E-40D2-B7A9-0AA059826DF5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{415FF9EF-194E-40D2-B7A9-0AA059826DF5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{415FF9EF-194E-40D2-B7A9-0AA059826DF5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
