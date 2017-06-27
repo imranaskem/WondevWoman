@@ -75,13 +75,18 @@ public class Player
 
                 var turn = new Turn(dir1, dir2);
                 var order = new Order(OrderType.MoveBuild, turn);
-                legalOrders.AddOrder(order);
+                legalOrders.AddOrder(order, map, humanUnits.GetFirstUnit().Position);
             }
 
             // Write an action using Console.WriteLine()
             // To debug: Console.Error.WriteLine("Debug messages...");
         }
     }
+}
+
+public class Bot
+{
+
 }
 
 public class PlayerUnits
@@ -98,6 +103,18 @@ public class PlayerUnits
             var unit = new Unit(Owner.Human, pos);
             this.Units.Add(unit);
         }
+    }
+
+    public Unit GetFirstUnit()
+    {
+        var unit = this.Units.FirstOrDefault();
+
+        if (unit == null)
+        {
+            throw new Exception();
+        }
+
+        return unit;
     }
 }
 
@@ -121,6 +138,13 @@ public class Unit
 public class Map
 {
     public List<Tile> Tiles { get; set; }
+    public int MapTileCount
+    {
+        get
+        {
+            return this.Tiles.Count;
+        }
+    }
 
     public Map(int size)
     {
@@ -139,7 +163,19 @@ public class Map
 
     public void AddTile(Tile tile)
     {
+        if (this.Tiles
+            .Exists(ti => ti.Position.X.Number == tile.Position.X.Number 
+            && ti.Position.Y.Number == tile.Position.Y.Number))
+        {
+            throw new ArgumentException();
+        }
+
         this.Tiles.Add(tile);
+    }
+
+    public Tile FindTile(Position pos)
+    {
+        return this.FindTile(pos.X.Number, pos.Y.Number);
     }
 
     public Tile FindTile(int x, int y)
@@ -177,16 +213,18 @@ public class Tile
 
 public class OrderList
 {
-    public List<Order> OrdersList { get; private set; }
+    public Dictionary<Order,Tile> OrdersList { get; set; }
 
     public OrderList()
     {
-        this.OrdersList = new List<Order>();
+        this.OrdersList = new Dictionary<Order, Tile>();
     }
 
-    public void AddOrder(Order order)
+    public void AddOrder(Order order, Map map, Position unitPos)
     {
-        this.OrdersList.Add(order);
+        var tile = map.FindTile(unitPos);
+
+        this.OrdersList.Add(order, tile);
     }
 }
 
