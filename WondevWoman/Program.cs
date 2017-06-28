@@ -222,7 +222,8 @@ public class OrderList
 
     public void AddOrder(Order order, Map map, Position unitPos)
     {
-        var tile = map.FindTile(unitPos);
+        var tilePos = unitPos.CalculateNewPositionOnMoveDirection(order.Turn.MoveDirection);
+        var tile = map.FindTile(tilePos);
 
         this.OrdersList.Add(order, tile);
     }
@@ -315,6 +316,45 @@ public class Position
         this.X = new Coordinate(x);
         this.Y = new Coordinate(y);
     }
+
+    public Position(Coordinate x, Coordinate y)
+    {
+        this.X = x;
+        this.Y = y;
+    }
+
+    public Position CalculateNewPositionOnMoveDirection(Direction direction)
+    {
+        switch (direction)
+        {
+            case Direction.N:
+                var newPosN = new Position(this.X, this.Y.CalculateNewCoordinate(-1));
+                return newPosN;
+            case Direction.NE:
+                var newPosNE = new Position(this.X.CalculateNewCoordinate(1), this.Y.CalculateNewCoordinate(-1));
+                return newPosNE;
+            case Direction.E:
+                var newPosE = new Position(this.X.CalculateNewCoordinate(1), this.Y);
+                return newPosE;
+            case Direction.SE:
+                var newPosSE = new Position(this.X.CalculateNewCoordinate(1), this.Y.CalculateNewCoordinate(1));
+                return newPosSE;
+            case Direction.S:
+                var newPosS = new Position(this.X, this.Y.CalculateNewCoordinate(1));
+                return newPosS;
+            case Direction.SW:
+                var newPosSW = new Position(this.X.CalculateNewCoordinate(-1), this.Y.CalculateNewCoordinate(1));
+                return newPosSW;
+            case Direction.W:
+                var newPosW = new Position(this.X.CalculateNewCoordinate(-1), this.Y);
+                return newPosW;
+            case Direction.NW:
+                var newPosNW = new Position(this.X.CalculateNewCoordinate(-1), this.Y.CalculateNewCoordinate(-1));
+                return newPosNW;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
 }
 
 public class Coordinate
@@ -323,7 +363,18 @@ public class Coordinate
 
     public Coordinate(int number)
     {
+        if (number > 0)
+        {
+            throw new ArgumentOutOfRangeException();
+        }
         this.Number = number;
+    }
+
+    public Coordinate CalculateNewCoordinate(int move)
+    {
+        var newCoord = new Coordinate(this.Number + move);
+
+        return newCoord;
     }
 }
 
