@@ -80,13 +80,28 @@ public class Player
 
             // Write an action using Console.WriteLine()
             // To debug: Console.Error.WriteLine("Debug messages...");
+
+            var bot = new Bot();
+
+            var orderToWrite = bot.CalculateOrder(legalOrders);
+
+            Console.WriteLine(orderToWrite.ToString());
         }
     }
 }
 
 public class Bot
-{
+{  
+    public Order CalculateOrder(OrderList legalMoves)
+    {
+        var moveTile = legalMoves.PreferredMoveTile();
 
+        var buildTile = legalMoves.PreferredBuildTile(moveTile);
+
+        var order = legalMoves.GetOrderBasedOnTiles(moveTile, buildTile);
+
+        return order;
+    }
 }
 
 public class PlayerUnits
@@ -137,7 +152,7 @@ public class Unit
 
 public class Map
 {
-    public List<Tile> Tiles { get; set; }
+    public List<Tile> Tiles { get; private set; }
     public int MapTileCount
     {
         get
@@ -194,7 +209,7 @@ public class Map
     }
 }
 
-public class Tile
+public class Tile : IEquatable<Tile>
 {
     public Position Position { get; private set; }
     public int Level { get; private set; }
@@ -209,23 +224,93 @@ public class Tile
     {
         this.Level = level;
     }
+
+    public bool Equals(Tile other)
+    {
+        if (this.Level == other.Level && this.Position.Equals(other.Position))
+        {
+            return true;
+        }
+
+        return false;
+    }
 }
 
 public class OrderList
 {
-    public Dictionary<Order,Tile> OrdersList { get; set; }
+    public Dictionary<Order,OrderTiles> OrdersList { get; set; }
 
     public OrderList()
     {
-        this.OrdersList = new Dictionary<Order, Tile>();
+        this.OrdersList = new Dictionary<Order, OrderTiles>();
     }
 
     public void AddOrder(Order order, Map map, Position unitPos)
     {
-        var tilePos = unitPos.CalculateNewPositionOnMoveDirection(order.Turn.MoveDirection);
-        var tile = map.FindTile(tilePos);
+        var moveTilePos = unitPos.CalculateNewPositionOnDirection(order.Turn.MoveDirection);
+        var moveTile = map.FindTile(moveTilePos);
 
-        this.OrdersList.Add(order, tile);
+        var buildTilePos = moveTilePos.CalculateNewPositionOnDirection(order.Turn.BuildDirection);
+        var buildTile = map.FindTile(buildTilePos);
+
+        var orderTile = new OrderTiles(moveTile, buildTile);
+
+        this.OrdersList.Add(order, orderTile);
+    }
+
+    public Tile PreferredMoveTile()
+    {
+        var kvp = this.OrdersList
+            .Where(dict => dict.Value.MoveTile.Level < 3 && dict.Value.MoveTile.Level > -1)
+            .OrderByDescending(dict => dict.Value.MoveTile.Level)
+            .FirstOrDefault();
+
+        if (kvp.Value == null)
+        {
+            throw new Exception();
+        }
+
+        var tile = kvp.Value.MoveTile;                   
+
+        return tile;
+    }
+
+    public Tile PreferredBuildTile(Tile moveTile)
+    {
+        var kvp = this.OrdersList
+            .Where(dict => dict.Value.MoveTile.Equals(moveTile))
+            .Where(dict => dict.Value.BuildTile.Level < 3 && dict.Value.BuildTile.Level > -1)
+            .OrderByDescending(dict => dict.Value.BuildTile.Level)
+            .FirstOrDefault();
+
+        if (kvp.Value == null)
+        {
+            throw new Exception();
+        }
+
+        var tile = kvp.Value.BuildTile;
+
+        return tile;
+    }
+
+    public Order GetOrderBasedOnTiles(Tile moveTile, Tile buildTile)
+    {
+        var order = this.OrdersList.Single(dict => dict.Value.MoveTile.Equals(moveTile) 
+                        && dict.Value.BuildTile.Equals(buildTile)).Key;
+
+        return order;
+    }
+}
+
+public class OrderTiles
+{
+    public Tile MoveTile { get; set; }
+    public Tile BuildTile { get; set; }
+
+    public OrderTiles(Tile move, Tile build)
+    {
+        this.MoveTile = move;
+        this.BuildTile = build;
     }
 }
 
@@ -250,7 +335,7 @@ public class Order
         this.Turn = turn;
     }
 
-    public string WriteOrder()
+    public override string ToString()
     {
         var order = $"{this.OrderTypesDictionary[this.OrderType]} {this.Index} {this.Turn}";
 
@@ -271,34 +356,9 @@ public class Turn
 
     public Turn(string move, string build)
     {
-        this.MoveDirection = this.ParseStringToDirection(move);
-        this.BuildDirection = this.ParseStringToDirection(build);
-    }
-
-    public Direction ParseStringToDirection(string letter)
-    {
-        switch (letter)
-        {
-            case "N":
-                return Direction.N;
-            case "NE":
-                return Direction.NE;
-            case "E":
-                return Direction.E;
-            case "SE":
-                return Direction.SE;
-            case "S":
-                return Direction.S;
-            case "SW":
-                return Direction.SW;
-            case "W":
-                return Direction.W;
-            case "NW":
-                return Direction.NW;
-            default:
-                throw new ArgumentOutOfRangeException();                
-        }
-    }
+        this.MoveDirection = (Direction)Enum.Parse(typeof(Direction), move);
+        this.BuildDirection = (Direction)Enum.Parse(typeof(Direction), build);
+    }   
 
     public override string ToString()
     {
@@ -306,7 +366,7 @@ public class Turn
     }
 }
 
-public class Position
+public class Position : IEquatable<Position>
 {
     public Coordinate X { get; set; }
     public Coordinate Y { get; set; }
@@ -323,8 +383,8 @@ public class Position
         this.Y = y;
     }
 
-    public Position CalculateNewPositionOnMoveDirection(Direction direction)
-    {
+    public Position CalculateNewPositionOnDirection(Direction direction)
+    {        
         switch (direction)
         {
             case Direction.N:
@@ -355,17 +415,27 @@ public class Position
                 throw new ArgumentOutOfRangeException();
         }
     }
+
+    public bool Equals(Position other)
+    {
+        if (this.X.Equals(other.X) && this.Y.Equals(other.Y))
+        {
+            return true;
+        }
+
+        return false;
+    }
 }
 
-public class Coordinate
+public class Coordinate : IEquatable<Coordinate>
 {
     public int Number { get; set; }
 
     public Coordinate(int number)
     {
-        if (number > 0)
+        if (number < 0)
         {
-            throw new ArgumentOutOfRangeException();
+            throw new ArgumentOutOfRangeException($"{number}");
         }
         this.Number = number;
     }
@@ -375,6 +445,11 @@ public class Coordinate
         var newCoord = new Coordinate(this.Number + move);
 
         return newCoord;
+    }
+
+    public bool Equals(Coordinate other)
+    {
+        return this.Number == other.Number;
     }
 }
 

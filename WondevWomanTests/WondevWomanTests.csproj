@@ -44,7 +44,9 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CoordinateTests.cs" />
     <Compile Include="MapTests.cs" />
+    <Compile Include="OrderListTests.cs" />
     <Compile Include="OrderTests.cs" />
     <Compile Include="TurnTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

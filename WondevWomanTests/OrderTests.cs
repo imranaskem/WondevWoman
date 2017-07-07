@@ -18,7 +18,7 @@ public class OrderTests
     {
         var order = new Order(OrderType.MoveBuild, new Turn(Direction.N, Direction.S));
 
-        var writeOrder = order.WriteOrder();
+        var writeOrder = order.ToString();
 
         Assert.That(writeOrder, Is.EqualTo("MOVE&BUILD 0 N S"));
     }
